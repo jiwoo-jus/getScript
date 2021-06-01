@@ -4,9 +4,9 @@ from google.cloud import vision
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QProgressBar
 from PyQt5.QtCore import QBasicTimer
-import temp
-from playOCR import detect_text
+from playOCR import detect_text, script
 from setROI import staticROI
+
 
 def capture(videoFile, imagePath):
     roi = staticROI(videoFile)
@@ -21,42 +21,6 @@ def capture(videoFile, imagePath):
             cv2.imwrite(imagePath + "/target%d.jpg" % count, clip)
         count += 1
     cap.release()
-
-
-def script(imagePath, scriptPath):
-    imglen = len(os.listdir(imagePath))
-    count = 0
-    before = ''
-    with open(scriptPath + '\\Script.txt', 'w', encoding='utf-8') as f:
-        f.write('')
-    with open(scriptPath + '\\target.txt', 'w', encoding='utf-8') as f:
-        f.write('')
-    while (count < imglen * 30):
-        with open(scriptPath + '\\target.txt', 'r', encoding='utf-8') as f:
-            before = f.read()
-        now = detect_text(imagePath + '\\target' + str(count) + '.jpg')
-        if (len(now) == 0):
-            pass
-        if (similarity(before, now) < 0.7):
-            with open(scriptPath + '\\Script.txt', 'a', encoding='utf-8') as f:
-                f.write(now)
-                print(now)
-        with open(scriptPath + '\\target.txt', 'w', encoding='utf-8') as f:
-            f.write(now)
-        count += 30
-    os.remove(scriptPath + '\\target.txt')
-    shutil.rmtree(imagePath)
-
-
-def similarity(before, now):
-    before = before.replace(' ', '')
-    now = now.replace(' ', '')
-    same_list = []
-    for i in now:
-        if i in before:
-            same_list.append(i)
-    similarity = len(same_list) * 2/ (len(before) + len(now))
-    return similarity
 
 
 class QtGUI(QWidget):
