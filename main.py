@@ -4,14 +4,15 @@ from google.cloud import vision
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QProgressBar
 from PyQt5.QtCore import QBasicTimer
-from playOCR import detect_text, script
-from setROI import staticROI
+from writeScript import detect_text, script
+from cropVideo import staticROI
 
 
-def capture(videoFile, imagePath):
+def capture(videoFile, imagePath, pbar2):
     roi = staticROI(videoFile)
     cap = cv2.VideoCapture(videoFile)
     count = 0
+    pbar2.setMaximum(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     while True:
         ret, image = cap.read()
         if not ret:
@@ -20,6 +21,7 @@ def capture(videoFile, imagePath):
             clip = image[roi.y1:roi.y2, roi.x1:roi.x2].copy()
             cv2.imwrite(imagePath + "/target%d.jpg" % count, clip)
         count += 1
+        pbar2.setValue(count)
     cap.release()
 
 
@@ -33,6 +35,10 @@ class QtGUI(QWidget):
         self.position = 0
         self.Lgrid = QGridLayout()
         self.setLayout(self.Lgrid)
+        self.pbar = QProgressBar(self)
+        self.pbar.setGeometry(15, 330, 300, 25)
+        self.pbar2 = QProgressBar(self)
+        self.pbar2.setGeometry(15, 150, 300, 25)
 
         self.label1 = QLabel('', self)
         self.label2 = QLabel('', self)
@@ -50,7 +56,6 @@ class QtGUI(QWidget):
         self.Lgrid.addWidget(self.label3, 4, 1)
         self.Lgrid.addWidget(addbutton2, 5, 1)
         addbutton2.clicked.connect(self.write_script)
-
         self.show()
 
     def video_select(self):
@@ -66,7 +71,7 @@ class QtGUI(QWidget):
         if not os.path.exists('Capture'):
             os.makedirs('Capture')
         imagePath = savepath + '\\Capture'
-        capture(videoFile, imagePath)
+        capture(videoFile, imagePath, self.pbar2)
         self.label2.setText("Successed Video_cap!")
 
     def write_script(self):
@@ -78,8 +83,8 @@ class QtGUI(QWidget):
             os.makedirs('Script')
         imagePath = savepath + '\\Capture'
         scriptPath = savepath + '\\Script'
-        script(imagePath, scriptPath)
-        self.label3.setText('Successed write_script!')
+        script(imagePath, scriptPath, self.pbar)
+        self.label3.setText('Successed Write_script!')
 
 
 if __name__ == '__main__':

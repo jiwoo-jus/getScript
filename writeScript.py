@@ -4,7 +4,7 @@ from google.cloud import vision
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QProgressBar
 from PyQt5.QtCore import QBasicTimer
-from setROI import staticROI
+from cropVideo import staticROI
 
 os.environ['GOOGLE_APPLICATION_CREDENTIALS']=r"C:\WorkSpace\pycharm\pythonProject-jiwjus_img2txt\jw-img2txt-8f65dde3d9fb.json"
 
@@ -34,7 +34,7 @@ def similarity(before, now):
     return similarity
 
 
-def script(imagePath, scriptPath):
+def script(imagePath, scriptPath, progressBar):
     imglen = len(os.listdir(imagePath))
     count = 0
     before = ''
@@ -42,10 +42,13 @@ def script(imagePath, scriptPath):
         f.write('')
     with open(scriptPath + '\\target.txt', 'w', encoding='utf-8') as f:
         f.write('')
-    while (count < imglen * 30):
+
+    progressBar.setMaximum(imglen)
+
+    while (count < imglen):
         with open(scriptPath + '\\target.txt', 'r', encoding='utf-8') as f:
             before = f.read()
-        now = detect_text(imagePath + '\\target' + str(count) + '.jpg')
+        now = detect_text(imagePath + '\\target' + str(count * 30) + '.jpg')
         if (len(now) == 0):
             pass
         if (similarity(before, now) < 0.7):
@@ -54,6 +57,8 @@ def script(imagePath, scriptPath):
                 print(now)
         with open(scriptPath + '\\target.txt', 'w', encoding='utf-8') as f:
             f.write(now)
-        count += 30
+        count += 1
+        progressBar.setValue(count)
+
     os.remove(scriptPath + '\\target.txt')
     shutil.rmtree(imagePath)
