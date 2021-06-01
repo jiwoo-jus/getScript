@@ -10,7 +10,7 @@ from translateLanguage import trans
 class QtGUI(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Img to Text")
+        self.setWindowTitle("get script")
         self.resize(300, 100)
 
         self.layout = QVBoxLayout()
