@@ -1,14 +1,13 @@
-import os, io, sys, cv2, argparse
+import os, io, sys, cv2, shutil
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QGridLayout, QFileDialog, QLabel
 from google.cloud import vision
-from google.cloud.vision_v1 import types
-from hanspell import spell_checker
 
 os.environ['GOOGLE_APPLICATION_CREDENTIALS']=r"C:\WorkSpace\pycharm\pythonProject-jiwjus_img2txt\jw-img2txt-8f65dde3d9fb.json"
 
 class staticROI(object):
-    def __init__(self):
-        self.capture = cv2.VideoCapture('C:\\Users\\parkj\\Desktop\\script1.mp4')
+    def __init__(self, videoRef):
+        print(videoRef)
+        self.capture = cv2.VideoCapture(videoRef) #'C:\\Users\\parkj\\Desktop\\script1.mp4'
         # Bounding box reference points and boolean if we are extracting coordinates
         self.image_coordinates = []
         self.extract = False
@@ -77,8 +76,6 @@ class staticROI(object):
             print('Select ROI to crop before cropping')
 
 
-
-
 def detect_text(path):
     client = vision.ImageAnnotatorClient()
     with io.open(path, 'rb') as image_file:
@@ -92,32 +89,44 @@ def detect_text(path):
     ret = string.split()
     return string
 
+def similarilty(before, now):
+    before_list = before.replace(' ', '')
+    now_list = now.replace(' ', '')
+    same_list = []
+    for i in now_list:
+        if i in before_list:
+            same_list.append(i)
+    similarilty = len(same_list) * 2 / (len(before_list) + len(now_list))
+    return similarilty
+
 
 class QtGUI(QWidget):
-
     def __init__(self):
         super().__init__()
         self.num = 0
-        self.setWindowTitle("Img to Text")  # 위젯타이틀 설정
-        self.resize(300, 400)  # 사이즈 가로 300, 세로 400
+        self.setWindowTitle("Img to Text")
+        self.resize(300, 400)
         self.qclist = []
         self.position = 0
-        self.Lgrid = QGridLayout()  # 격자모양표에 요소 순차 배치 레이아웃
+        self.Lgrid = QGridLayout()
         self.setLayout(self.Lgrid)
-        self.label1 = QLabel('', self)  # 빈 문자열로 채운 라벨 생성
+
+        self.label1 = QLabel('', self)
         self.label2 = QLabel('', self)
         self.label3 = QLabel('', self)
-        self.label4 = QLabel('', self)
-        addbutton1 = QPushButton('Open File', self)  # 'OpenFile' 문자열로 표시되는 버튼 생성
-        self.Lgrid.addWidget(self.label1, 1, 1)  # (1,1)위치에 label1 부착
-        self.Lgrid.addWidget(addbutton1, 2, 1)  # (2,1)위치에 addbutton1 부착
-        addbutton1.clicked.connect(self.video_select)  # 사용자가 버튼 클릭시 add_open 함수 실행
+
+        addbutton1 = QPushButton('Open File', self)
+        self.Lgrid.addWidget(self.label1, 1, 1)
+        self.Lgrid.addWidget(addbutton1, 2, 1)
+        addbutton1.clicked.connect(self.video_select)
+
+        addbutton2 = QPushButton('Run', self)
         self.Lgrid.addWidget(self.label2, 3, 1)
-        addbutton1.clicked.connect(self.video_cap)
-        addbutton3 = QPushButton('Run', self)
+        addbutton2.clicked.connect(self.video_cap)
+
         self.Lgrid.addWidget(self.label3, 4, 1)
-        self.Lgrid.addWidget(addbutton3, 5, 1)
-        addbutton3.clicked.connect(self.write_script)
+        self.Lgrid.addWidget(addbutton2, 5, 1)
+        addbutton2.clicked.connect(self.write_script)
         self.show()
 
     def video_select(self):
@@ -126,16 +135,15 @@ class QtGUI(QWidget):
         self.label1.setText(FileOpen[0])
 
     def video_cap(self):
-
-        roi = staticROI()
+        videoPath = self.label1.text()
+        roi = staticROI(videoPath)
         print(roi.y1, roi.y2, roi.x1, roi.x2)
         savepath = self.label1.text().split('/')
-        #filename = (savepath.pop()).split('.')[0].capitalize()
+        filename = (savepath.pop()).split('.')[0].capitalize()
         savepath = ('\\').join(savepath)
         os.chdir(savepath)
         if not os.path.exists('Capture'):
             os.makedirs('Capture')
-        videoPath = self.label1.text()
         imagePath = savepath + '\\Capture'
 
         cap = cv2.VideoCapture(videoPath)
@@ -143,17 +151,12 @@ class QtGUI(QWidget):
 
         while True:
             ret, image = cap.read()
-
             if not ret:
                 break
-
             if (count % 30 == 0):
-                ## 이미지 자르기 부분 수정 필요
                 clip = image[roi.y1:roi.y2, roi.x1:roi.x2].copy()
                 cv2.imwrite(imagePath + "/target%d.jpg" % count, clip)
-
             count += 1
-
         cap.release()
         self.label2.setText("Done!")
 
@@ -166,29 +169,32 @@ class QtGUI(QWidget):
             os.makedirs('Script')
         scriptPath = savepath + '\\Script'
         imagePath = savepath + '\\Capture'
+        imglen = len(os.listdir(imagePath))
 
         count = 0
         before = ''
         with open(scriptPath + '\\Script.txt', 'w', encoding='utf-8') as f:
             f.write('')
 
-        while True:
+        while (count < imglen * 30):
             cap = cv2.VideoCapture(imagePath + '\\target' + str(count) + '.jpg')
-
             ret, image = cap.read()
 
             if (count % 30 == 0):
                 if (count != 0):
-                    with open(scriptPath + '\\NewTarget' + str(count - 30) + '.txt', 'r', encoding='utf-8') as f:
+                    with open(scriptPath + '\\target.txt', 'r', encoding='utf-8') as f:
                         before = f.read()
                 now = detect_text(imagePath + '\\target' + str(count) + '.jpg')
-                with open(scriptPath + '\\NewTarget' + str(count) + '.txt', 'w', encoding='utf-8') as f:
-                    f.write(now)
-                if (before != now or before == ''):
+                if (similarilty(before, now) < 0.7 or before == ''):
                     with open(scriptPath + '\\Script.txt', 'a', encoding='utf-8') as f:
                         f.write(now)
                         print(now)
+                with open(scriptPath + '\\target.txt', 'w', encoding='utf-8') as f:
+                    f.write(now)
             count += 30
+        cap.release()
+        os.remove(scriptPath + '\\target.txt')
+        shutil.rmtree(imagePath)
         self.label3.setText('Successed')
 
 
