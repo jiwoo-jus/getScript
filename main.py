@@ -5,7 +5,7 @@ from PyQt5.QtCore import Qt
 from extractFrames import capture
 from writeScript import script
 from textToAudio import audio
-
+from translateLanguage import trans
 
 class QtGUI(QWidget):
     def __init__(self):
@@ -19,6 +19,7 @@ class QtGUI(QWidget):
         self.mid1Layout = QHBoxLayout()
         self.mid2Layout = QVBoxLayout()
         self.bottomLayout = QGridLayout()
+        self.bottom2Layout = QVBoxLayout()
 
         self.mid2Layout.addStretch(1)
 
@@ -26,6 +27,7 @@ class QtGUI(QWidget):
         self.layout.addLayout(self.mid1Layout)
         self.layout.addLayout(self.mid2Layout)
         self.layout.addLayout(self.bottomLayout)
+        self.layout.addLayout(self.bottom2Layout)
 
         self.setLayout(self.layout)
 
@@ -38,6 +40,7 @@ class QtGUI(QWidget):
         self.addbutton1 = QPushButton('Open File', self)
         self.addbutton2 = QPushButton('Run', self)
         self.addbutton3 = QPushButton('TextToSpeech', self)
+        self.addbutton4 = QPushButton('Translate', self)
 
         self.topLayout.addWidget(self.label1)
         self.topLayout.addWidget(self.addbutton1)
@@ -48,7 +51,8 @@ class QtGUI(QWidget):
         self.bottomLayout.addWidget(self.label5, 1, 0)
         self.bottomLayout.addWidget(self.pbar1, 0, 1)
         self.bottomLayout.addWidget(self.pbar2, 1, 1)
-        self.bottomLayout.addWidget(self.addbutton3, 2, 0)
+        self.bottom2Layout.addWidget(self.addbutton3)
+        self.bottom2Layout.addWidget(self.addbutton4)
 
         self.label2.setAlignment(Qt.AlignCenter)
 
@@ -56,6 +60,7 @@ class QtGUI(QWidget):
         self.addbutton2.clicked.connect(self.extract_frames)
         self.addbutton2.clicked.connect(self.write_script)
         self.addbutton3.clicked.connect(self.text_to_audio)
+        self.addbutton4.clicked.connect(self.trans)
         self.show()
 
     def video_select(self):
@@ -90,10 +95,21 @@ class QtGUI(QWidget):
         print("\n>>> text_to_audio...")
         savepath = self.label1.text().split('/')
         videoname = savepath.pop().split('.')[0]
+        scriptname = videoname + '_script.txt'
         savepath = ('\\').join(savepath)
         os.chdir(savepath)
         audioFile = savepath + '\\' + videoname + '_script.mp3'
-        audio(audioFile, videoname)
+        audio(audioFile, scriptname)
+
+    def trans(self):
+        print("\n>>> translate English to Korean...")
+        savepath = self.label1.text().split('/')
+        videoname = savepath.pop().split('.')[0]
+        scriptname = videoname + '_script.txt'
+        transname = videoname + '_translated_script.txt'
+        savepath = ('\\').join(savepath)
+        os.chdir(savepath)
+        trans(scriptname, transname)
 
 
 if __name__ == '__main__':
