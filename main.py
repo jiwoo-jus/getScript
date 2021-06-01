@@ -1,12 +1,9 @@
-import os, io, sys, cv2, shutil
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QGridLayout, QFileDialog, QLabel
-from google.cloud import vision
+import os
+from PyQt5.QtWidgets import QGridLayout, QFileDialog, QLabel
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QProgressBar
-from PyQt5.QtCore import QBasicTimer
-from writeScript import detect_text, script
+from writeScript import script
 from extractFrames import capture
-import extractFrames
 
 
 class QtGUI(QWidget):
@@ -35,7 +32,7 @@ class QtGUI(QWidget):
 
         addbutton2 = QPushButton('Run', self)
         self.Lgrid.addWidget(self.label2, 3, 1)
-        addbutton2.clicked.connect(self.video_cap)
+        addbutton2.clicked.connect(self.extract_frames)
 
         self.Lgrid.addWidget(self.label3, 4, 1)
         self.Lgrid.addWidget(addbutton2, 5, 1)
@@ -46,8 +43,8 @@ class QtGUI(QWidget):
         FileOpen = QFileDialog.getOpenFileName(self, 'Open file', r'C:\Users\parkj\Downloads')
         self.label1.setText(FileOpen[0])
 
-    def video_cap(self):
-        self.label2.setText("Doing video_cap")
+    def extract_frames(self):
+        self.label2.setText("Doing extract_frames")
         videoFile = self.label1.text()
         savepath = videoFile.split('/')[:-1]
         savepath = ('\\').join(savepath)
@@ -56,7 +53,7 @@ class QtGUI(QWidget):
             os.makedirs('Capture')
         imagePath = savepath + '\\Capture'
         capture(videoFile, imagePath, self.pbar2)
-        self.label2.setText("Successed Video_cap!")
+        self.label2.setText("Successed extract_frames!")
 
     def write_script(self):
         self.label3.setText('Doing write_script')

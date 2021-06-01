@@ -1,10 +1,5 @@
-import os, io, sys, cv2, shutil
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QGridLayout, QFileDialog, QLabel
+import os, io, shutil
 from google.cloud import vision
-import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QProgressBar
-from PyQt5.QtCore import QBasicTimer
-from extractFrames import staticROI
 
 os.environ['GOOGLE_APPLICATION_CREDENTIALS']=r"C:\WorkSpace\pycharm\pythonProject-jiwjus_img2txt\jw-img2txt-8f65dde3d9fb.json"
 

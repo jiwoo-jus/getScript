@@ -1,9 +1,4 @@
-import os, io, sys, cv2, shutil
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QGridLayout, QFileDialog, QLabel
-from google.cloud import vision
-import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QProgressBar
-from PyQt5.QtCore import QBasicTimer
+import cv2
 
 
 def capture(videoFile, imagePath, progressbar):
