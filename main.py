@@ -1,8 +1,7 @@
 import os
 import sys
-from PyQt5.QtWidgets import QWidget, QPushButton, QGridLayout, QFileDialog, QLabel, QProgressBar, QVBoxLayout, QHBoxLayout
+from PyQt5.QtWidgets import QWidget, QPushButton, QGridLayout, QFileDialog, QLabel, QProgressBar, QVBoxLayout, QHBoxLayout, QApplication
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QApplication
 from writeScript import script
 from extractFrames import capture
 
@@ -59,12 +58,14 @@ class QtGUI(QWidget):
         self.show()
 
     def video_select(self):
+        self.pbar1.setValue(0)
+        self.pbar2.setValue(0)
         FileOpen = QFileDialog.getOpenFileName(self, 'Open file', r'C:\Users\parkj\Downloads')
         self.label1.setText(FileOpen[0])
 
     def extract_frames(self):
         self.label2.setText("Generate script...")
-        print("\nextract frames...")
+        print("\n>>> extract frames...")
         videoFile = self.label1.text()
         print(videoFile)
         savepath = videoFile.split('/')[:-1]
@@ -76,7 +77,7 @@ class QtGUI(QWidget):
         capture(videoFile, imagePath, self.pbar1)
 
     def write_script(self):
-        print("\nwrite script...")
+        print("\n>>> write script...")
         savepath = self.label1.text().split('/')
         filename = savepath.pop().split('.')[0]
         savepath = ('\\').join(savepath)
