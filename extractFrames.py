@@ -20,7 +20,6 @@ def capture(videoFile, imagePath, progressbar):
 
 class staticROI(object):
     def __init__(self, videoFile):
-        print(videoFile)
         self.capture = cv2.VideoCapture(videoFile) #'C:\\Users\\parkj\\Desktop\\script1.mp4'
         # Bounding box reference points and boolean if we are extracting coordinates
         self.image_coordinates = []

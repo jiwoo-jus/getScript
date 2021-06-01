@@ -45,7 +45,9 @@ class QtGUI(QWidget):
 
     def extract_frames(self):
         self.label2.setText("Doing extract_frames")
+        print("\nextract frames...")
         videoFile = self.label1.text()
+        print(videoFile)
         savepath = videoFile.split('/')[:-1]
         savepath = ('\\').join(savepath)
         os.chdir(savepath)
@@ -57,6 +59,7 @@ class QtGUI(QWidget):
 
     def write_script(self):
         self.label3.setText('Doing write_script')
+        print("\nwrite script...")
         savepath = self.label1.text().split('/')
         filename = savepath.pop().split('.')[0]
         savepath = ('\\').join(savepath)

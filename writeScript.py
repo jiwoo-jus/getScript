@@ -14,7 +14,6 @@ def detect_text(path):
     string = ''
     for text in texts[:1]:
         string = text.description
-    ret = string.split()
     return string
 
 
