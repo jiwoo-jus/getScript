@@ -2,18 +2,16 @@ import os
 import sys
 from PyQt5.QtWidgets import QWidget, QPushButton, QGridLayout, QFileDialog, QLabel, QProgressBar, QVBoxLayout, QHBoxLayout, QApplication
 from PyQt5.QtCore import Qt
-from writeScript import script
 from extractFrames import capture
+from writeScript import script
+from textToAudio import audio
 
 
 class QtGUI(QWidget):
     def __init__(self):
         super().__init__()
-        self.num = 0
         self.setWindowTitle("Img to Text")
         self.resize(300, 100)
-        self.qclist = []
-        self.position = 0
 
         self.layout = QVBoxLayout()
 
@@ -22,7 +20,7 @@ class QtGUI(QWidget):
         self.mid2Layout = QVBoxLayout()
         self.bottomLayout = QGridLayout()
 
-        self.mid2Layout.addStretch(0.1)
+        self.mid2Layout.addStretch(1)
 
         self.layout.addLayout(self.topLayout)
         self.layout.addLayout(self.mid1Layout)
@@ -39,6 +37,7 @@ class QtGUI(QWidget):
         self.label5 = QLabel('Create Script', self)
         self.addbutton1 = QPushButton('Open File', self)
         self.addbutton2 = QPushButton('Run', self)
+        self.addbutton3 = QPushButton('TextToSpeech', self)
 
         self.topLayout.addWidget(self.label1)
         self.topLayout.addWidget(self.addbutton1)
@@ -49,12 +48,14 @@ class QtGUI(QWidget):
         self.bottomLayout.addWidget(self.label5, 1, 0)
         self.bottomLayout.addWidget(self.pbar1, 0, 1)
         self.bottomLayout.addWidget(self.pbar2, 1, 1)
+        self.bottomLayout.addWidget(self.addbutton3, 2, 0)
 
         self.label2.setAlignment(Qt.AlignCenter)
 
         self.addbutton1.clicked.connect(self.video_select)
         self.addbutton2.clicked.connect(self.extract_frames)
         self.addbutton2.clicked.connect(self.write_script)
+        self.addbutton3.clicked.connect(self.text_to_audio)
         self.show()
 
     def video_select(self):
@@ -67,7 +68,6 @@ class QtGUI(QWidget):
         self.label2.setText("Generate script...")
         print("\n>>> extract frames...")
         videoFile = self.label1.text()
-        print(videoFile)
         savepath = videoFile.split('/')[:-1]
         savepath = ('\\').join(savepath)
         os.chdir(savepath)
@@ -79,11 +79,21 @@ class QtGUI(QWidget):
     def write_script(self):
         print("\n>>> write script...")
         savepath = self.label1.text().split('/')
-        filename = savepath.pop().split('.')[0]
+        videoname = savepath.pop().split('.')[0]
         savepath = ('\\').join(savepath)
         os.chdir(savepath)
         imagePath = savepath + '\\Capture'
-        script(imagePath, savepath, filename, self.pbar2)
+        scriptFile = savepath + '\\' + videoname + '_script.txt'
+        script(imagePath, savepath, scriptFile, self.pbar2)
+
+    def text_to_audio(self):
+        print("\n>>> text_to_audio...")
+        savepath = self.label1.text().split('/')
+        videoname = savepath.pop().split('.')[0]
+        savepath = ('\\').join(savepath)
+        os.chdir(savepath)
+        audioFile = savepath + '\\' + videoname + '_script.mp3'
+        audio(audioFile, videoname)
 
 
 if __name__ == '__main__':

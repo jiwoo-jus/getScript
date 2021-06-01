@@ -1,6 +1,8 @@
 import os, io, shutil
 from google.cloud import vision
 
+from textToAudio import audio
+
 os.environ['GOOGLE_APPLICATION_CREDENTIALS']=r"C:\WorkSpace\pycharm\getScript\tough-forest-313501-3024710167ae.json"
 
 
@@ -28,11 +30,10 @@ def similarity(before, now):
     return similarity
 
 
-def script(imagePath, savePath, videoname, progressbar):
+def script(imagePath, savePath, scriptFile, progressbar):
     imglen = len(os.listdir(imagePath))
     count = 0
-    before = ''
-    scriptFile = savePath + '\\' + videoname + '_script.txt'
+    print(scriptFile)
     with open(scriptFile, 'w', encoding='utf-8') as f:
         f.write('')
     with open(savePath + '\\target.txt', 'w', encoding='utf-8') as f:
@@ -57,3 +58,4 @@ def script(imagePath, savePath, videoname, progressbar):
 
     os.remove(savePath + '\\target.txt')
     shutil.rmtree(imagePath)
+

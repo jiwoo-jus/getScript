@@ -2,6 +2,7 @@ import cv2
 
 
 def capture(videoFile, imagePath, progressbar):
+    print(videoFile)
     roi = staticROI(videoFile)
     cap = cv2.VideoCapture(videoFile)
     count = 0
@@ -20,7 +21,7 @@ def capture(videoFile, imagePath, progressbar):
 
 class staticROI(object):
     def __init__(self, videoFile):
-        self.capture = cv2.VideoCapture(videoFile) #'C:\\Users\\parkj\\Desktop\\script1.mp4'
+        self.capture = cv2.VideoCapture(videoFile)
         # Bounding box reference points and boolean if we are extracting coordinates
         self.image_coordinates = []
         self.extract = False
@@ -83,7 +84,6 @@ class staticROI(object):
             self.x2 = self.image_coordinates[1][0]
             self.y2 = self.image_coordinates[1][1]
             self.cropped_image = self.cropped_image[self.y1:self.y2, self.x1:self.x2]
-            print('Cropped image: {} {}'.format(self.image_coordinates[0], self.image_coordinates[1]))
-            #return x1, y1, x2, y2
+            print('Cropped: {} {}'.format(self.image_coordinates[0], self.image_coordinates[1]))
         else:
             print('Select ROI to crop before cropping')
