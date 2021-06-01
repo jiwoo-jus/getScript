@@ -5,24 +5,8 @@ import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QProgressBar
 from PyQt5.QtCore import QBasicTimer
 from writeScript import detect_text, script
-from cropVideo import staticROI
-
-
-def capture(videoFile, imagePath, pbar2):
-    roi = staticROI(videoFile)
-    cap = cv2.VideoCapture(videoFile)
-    count = 0
-    pbar2.setMaximum(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    while True:
-        ret, image = cap.read()
-        if not ret:
-            break
-        if (count % 30 == 0):
-            clip = image[roi.y1:roi.y2, roi.x1:roi.x2].copy()
-            cv2.imwrite(imagePath + "/target%d.jpg" % count, clip)
-        count += 1
-        pbar2.setValue(count)
-    cap.release()
+from extractFrames import capture
+import extractFrames
 
 
 class QtGUI(QWidget):
@@ -76,14 +60,12 @@ class QtGUI(QWidget):
 
     def write_script(self):
         self.label3.setText('Doing write_script')
-        savepath = self.label1.text().split('/')[:-1]
+        savepath = self.label1.text().split('/')
+        filename = savepath.pop().split('.')[0]
         savepath = ('\\').join(savepath)
         os.chdir(savepath)
-        if not os.path.exists('Script'):
-            os.makedirs('Script')
         imagePath = savepath + '\\Capture'
-        scriptPath = savepath + '\\Script'
-        script(imagePath, scriptPath, self.pbar)
+        script(imagePath, savepath, filename, self.pbar)
         self.label3.setText('Successed Write_script!')
 
 

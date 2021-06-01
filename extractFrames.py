@@ -5,6 +5,24 @@ import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QProgressBar
 from PyQt5.QtCore import QBasicTimer
 
+
+def capture(videoFile, imagePath, progressbar):
+    roi = staticROI(videoFile)
+    cap = cv2.VideoCapture(videoFile)
+    count = 0
+    progressbar.setMaximum(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    while True:
+        ret, image = cap.read()
+        if not ret:
+            break
+        if (count % 30 == 0):
+            clip = image[roi.y1:roi.y2, roi.x1:roi.x2].copy()
+            cv2.imwrite(imagePath + "/target%d.jpg" % count, clip)
+        count += 1
+        progressbar.setValue(count)
+    cap.release()
+
+
 class staticROI(object):
     def __init__(self, videoFile):
         print(videoFile)

@@ -4,7 +4,7 @@ from google.cloud import vision
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QProgressBar
 from PyQt5.QtCore import QBasicTimer
-from cropVideo import staticROI
+from extractFrames import staticROI
 
 os.environ['GOOGLE_APPLICATION_CREDENTIALS']=r"C:\WorkSpace\pycharm\pythonProject-jiwjus_img2txt\jw-img2txt-8f65dde3d9fb.json"
 
@@ -34,31 +34,32 @@ def similarity(before, now):
     return similarity
 
 
-def script(imagePath, scriptPath, progressBar):
+def script(imagePath, savePath, videoname, progressbar):
     imglen = len(os.listdir(imagePath))
     count = 0
     before = ''
-    with open(scriptPath + '\\Script.txt', 'w', encoding='utf-8') as f:
+    scriptFile = savePath + '\\' + videoname + '_script.txt'
+    with open(scriptFile, 'w', encoding='utf-8') as f:
         f.write('')
-    with open(scriptPath + '\\target.txt', 'w', encoding='utf-8') as f:
+    with open(savePath + '\\target.txt', 'w', encoding='utf-8') as f:
         f.write('')
 
-    progressBar.setMaximum(imglen)
+    progressbar.setMaximum(imglen)
 
     while (count < imglen):
-        with open(scriptPath + '\\target.txt', 'r', encoding='utf-8') as f:
+        with open(savePath + '\\target.txt', 'r', encoding='utf-8') as f:
             before = f.read()
         now = detect_text(imagePath + '\\target' + str(count * 30) + '.jpg')
         if (len(now) == 0):
             pass
         if (similarity(before, now) < 0.7):
-            with open(scriptPath + '\\Script.txt', 'a', encoding='utf-8') as f:
+            with open(scriptFile, 'a', encoding='utf-8') as f:
                 f.write(now)
                 print(now)
-        with open(scriptPath + '\\target.txt', 'w', encoding='utf-8') as f:
+        with open(savePath + '\\target.txt', 'w', encoding='utf-8') as f:
             f.write(now)
         count += 1
-        progressBar.setValue(count)
+        progressbar.setValue(count)
 
-    os.remove(scriptPath + '\\target.txt')
+    os.remove(savePath + '\\target.txt')
     shutil.rmtree(imagePath)
