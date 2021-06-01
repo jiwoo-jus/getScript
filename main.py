@@ -1,7 +1,8 @@
 import os
-from PyQt5.QtWidgets import QGridLayout, QFileDialog, QLabel
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QProgressBar
+from PyQt5.QtWidgets import QWidget, QPushButton, QGridLayout, QFileDialog, QLabel, QProgressBar, QVBoxLayout, QHBoxLayout
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QApplication
 from writeScript import script
 from extractFrames import capture
 
@@ -11,32 +12,50 @@ class QtGUI(QWidget):
         super().__init__()
         self.num = 0
         self.setWindowTitle("Img to Text")
-        self.resize(300, 400)
+        self.resize(300, 100)
         self.qclist = []
         self.position = 0
-        self.Lgrid = QGridLayout()
-        self.setLayout(self.Lgrid)
-        self.pbar = QProgressBar(self)
-        self.pbar.setGeometry(15, 330, 300, 25)
-        self.pbar2 = QProgressBar(self)
-        self.pbar2.setGeometry(15, 150, 300, 25)
 
+        self.layout = QVBoxLayout()
+
+        self.topLayout = QVBoxLayout()
+        self.mid1Layout = QHBoxLayout()
+        self.mid2Layout = QVBoxLayout()
+        self.bottomLayout = QGridLayout()
+
+        self.mid2Layout.addStretch(0.1)
+
+        self.layout.addLayout(self.topLayout)
+        self.layout.addLayout(self.mid1Layout)
+        self.layout.addLayout(self.mid2Layout)
+        self.layout.addLayout(self.bottomLayout)
+
+        self.setLayout(self.layout)
+
+        self.pbar1 = QProgressBar(self)
+        self.pbar2 = QProgressBar(self)
         self.label1 = QLabel('', self)
         self.label2 = QLabel('', self)
-        self.label3 = QLabel('', self)
+        self.label4 = QLabel('Image Capture', self)
+        self.label5 = QLabel('Create Script', self)
+        self.addbutton1 = QPushButton('Open File', self)
+        self.addbutton2 = QPushButton('Run', self)
 
-        addbutton1 = QPushButton('Open File', self)
-        self.Lgrid.addWidget(self.label1, 1, 1)
-        self.Lgrid.addWidget(addbutton1, 2, 1)
-        addbutton1.clicked.connect(self.video_select)
+        self.topLayout.addWidget(self.label1)
+        self.topLayout.addWidget(self.addbutton1)
+        self.mid1Layout.addWidget(self.label2)
+        self.mid2Layout.addWidget(self.addbutton2)
 
-        addbutton2 = QPushButton('Run', self)
-        self.Lgrid.addWidget(self.label2, 3, 1)
-        addbutton2.clicked.connect(self.extract_frames)
+        self.bottomLayout.addWidget(self.label4, 0, 0)
+        self.bottomLayout.addWidget(self.label5, 1, 0)
+        self.bottomLayout.addWidget(self.pbar1, 0, 1)
+        self.bottomLayout.addWidget(self.pbar2, 1, 1)
 
-        self.Lgrid.addWidget(self.label3, 4, 1)
-        self.Lgrid.addWidget(addbutton2, 5, 1)
-        addbutton2.clicked.connect(self.write_script)
+        self.label2.setAlignment(Qt.AlignCenter)
+
+        self.addbutton1.clicked.connect(self.video_select)
+        self.addbutton2.clicked.connect(self.extract_frames)
+        self.addbutton2.clicked.connect(self.write_script)
         self.show()
 
     def video_select(self):
@@ -44,7 +63,7 @@ class QtGUI(QWidget):
         self.label1.setText(FileOpen[0])
 
     def extract_frames(self):
-        self.label2.setText("Doing extract_frames")
+        self.label2.setText("Generate script...")
         print("\nextract frames...")
         videoFile = self.label1.text()
         print(videoFile)
@@ -54,19 +73,16 @@ class QtGUI(QWidget):
         if not os.path.exists('Capture'):
             os.makedirs('Capture')
         imagePath = savepath + '\\Capture'
-        capture(videoFile, imagePath, self.pbar2)
-        self.label2.setText("Successed extract_frames!")
+        capture(videoFile, imagePath, self.pbar1)
 
     def write_script(self):
-        self.label3.setText('Doing write_script')
         print("\nwrite script...")
         savepath = self.label1.text().split('/')
         filename = savepath.pop().split('.')[0]
         savepath = ('\\').join(savepath)
         os.chdir(savepath)
         imagePath = savepath + '\\Capture'
-        script(imagePath, savepath, filename, self.pbar)
-        self.label3.setText('Successed Write_script!')
+        script(imagePath, savepath, filename, self.pbar2)
 
 
 if __name__ == '__main__':
