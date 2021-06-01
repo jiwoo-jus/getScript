@@ -1,13 +1,17 @@
 import os, io, sys, cv2, shutil
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QGridLayout, QFileDialog, QLabel
 from google.cloud import vision
+import sys
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QProgressBar
+from PyQt5.QtCore import QBasicTimer
+import temp
 
 os.environ['GOOGLE_APPLICATION_CREDENTIALS']=r"C:\WorkSpace\pycharm\pythonProject-jiwjus_img2txt\jw-img2txt-8f65dde3d9fb.json"
 
 class staticROI(object):
-    def __init__(self, videoRef):
-        print(videoRef)
-        self.capture = cv2.VideoCapture(videoRef) #'C:\\Users\\parkj\\Desktop\\script1.mp4'
+    def __init__(self, videoFile):
+        print(videoFile)
+        self.capture = cv2.VideoCapture(videoFile) #'C:\\Users\\parkj\\Desktop\\script1.mp4'
         # Bounding box reference points and boolean if we are extracting coordinates
         self.image_coordinates = []
         self.extract = False
@@ -96,7 +100,7 @@ def similarilty(before, now):
     for i in now_list:
         if i in before_list:
             same_list.append(i)
-    similarilty = len(same_list) * 2 / (len(before_list) + len(now_list))
+    similarilty = (len(same_list) * 2 + 1) / ((len(before_list) + len(now_list)) + 1)
     return similarilty
 
 
@@ -105,7 +109,7 @@ class QtGUI(QWidget):
         super().__init__()
         self.num = 0
         self.setWindowTitle("Img to Text")
-        self.resize(300, 400)
+        self.resize(300, 600)
         self.qclist = []
         self.position = 0
         self.Lgrid = QGridLayout()
@@ -115,6 +119,9 @@ class QtGUI(QWidget):
         self.label2 = QLabel('', self)
         self.label3 = QLabel('', self)
 
+        self.pbar = QProgressBar(self)
+        self.pbar.setGeometry(30, 40, 200, 25)
+
         addbutton1 = QPushButton('Open File', self)
         self.Lgrid.addWidget(self.label1, 1, 1)
         self.Lgrid.addWidget(addbutton1, 2, 1)
@@ -122,12 +129,30 @@ class QtGUI(QWidget):
 
         addbutton2 = QPushButton('Run', self)
         self.Lgrid.addWidget(self.label2, 3, 1)
+        addbutton2.clicked.connect(self.doAction)
         addbutton2.clicked.connect(self.video_cap)
+        self.timer = QBasicTimer()
+        self.step = 0
 
         self.Lgrid.addWidget(self.label3, 4, 1)
         self.Lgrid.addWidget(addbutton2, 5, 1)
         addbutton2.clicked.connect(self.write_script)
+
         self.show()
+
+    def timerEvent(self, e):
+        if self.step >= 100:
+            self.timer.stop()
+            return
+
+        self.step = self.step + 1
+        self.pbar.setValue(self.step)
+
+    def doAction(self):
+        if self.timer.isActive():
+            self.timer.stop()
+        else:
+            self.timer.start(100, self)
 
     def video_select(self):
         FileOpen = QFileDialog.getOpenFileName(self, 'Open file', r'C:\Users\parkj\Downloads')
@@ -135,18 +160,20 @@ class QtGUI(QWidget):
         self.label1.setText(FileOpen[0])
 
     def video_cap(self):
-        videoPath = self.label1.text()
-        roi = staticROI(videoPath)
+        self.label2.setText("Doing video_cap")
+        videoFile = self.label1.text()
+        roi = staticROI(videoFile)
         print(roi.y1, roi.y2, roi.x1, roi.x2)
-        savepath = self.label1.text().split('/')
-        filename = (savepath.pop()).split('.')[0].capitalize()
+        print(videoFile)
+        print(self.label1.text())
+        savepath = videoFile.split('/')[:-1]
         savepath = ('\\').join(savepath)
         os.chdir(savepath)
         if not os.path.exists('Capture'):
             os.makedirs('Capture')
         imagePath = savepath + '\\Capture'
 
-        cap = cv2.VideoCapture(videoPath)
+        cap = cv2.VideoCapture(videoFile)
         count = 0
 
         while True:
@@ -158,11 +185,11 @@ class QtGUI(QWidget):
                 cv2.imwrite(imagePath + "/target%d.jpg" % count, clip)
             count += 1
         cap.release()
-        self.label2.setText("Done!")
+        self.label2.setText("Successed Video_cap!")
 
     def write_script(self):
-        savepath = self.label1.text().split('/')
-        filename = (savepath.pop()).split('.')[0].capitalize()
+        self.label3.setText('Doing write_script')
+        savepath = self.label1.text().split('/')[:-1]
         savepath = ('\\').join(savepath)
         os.chdir(savepath)
         if not os.path.exists('Script'):
@@ -177,25 +204,22 @@ class QtGUI(QWidget):
             f.write('')
 
         while (count < imglen * 30):
-            cap = cv2.VideoCapture(imagePath + '\\target' + str(count) + '.jpg')
-            ret, image = cap.read()
-
-            if (count % 30 == 0):
-                if (count != 0):
-                    with open(scriptPath + '\\target.txt', 'r', encoding='utf-8') as f:
-                        before = f.read()
-                now = detect_text(imagePath + '\\target' + str(count) + '.jpg')
-                if (similarilty(before, now) < 0.7 or before == ''):
-                    with open(scriptPath + '\\Script.txt', 'a', encoding='utf-8') as f:
-                        f.write(now)
-                        print(now)
-                with open(scriptPath + '\\target.txt', 'w', encoding='utf-8') as f:
+            if (count != 0):
+                with open(scriptPath + '\\target.txt', 'r', encoding='utf-8') as f:
+                    before = f.read()
+            now = detect_text(imagePath + '\\target' + str(count) + '.jpg')
+            if(len(now) == 0):
+                pass
+            if (similarilty(before, now) < 0.7 or before == ''):
+                with open(scriptPath + '\\Script.txt', 'a', encoding='utf-8') as f:
                     f.write(now)
+                    print(now)
+            with open(scriptPath + '\\target.txt', 'w', encoding='utf-8') as f:
+                f.write(now)
             count += 30
-        cap.release()
         os.remove(scriptPath + '\\target.txt')
         shutil.rmtree(imagePath)
-        self.label3.setText('Successed')
+        self.label3.setText('Successed write_script!')
 
 
 if __name__ == '__main__':
