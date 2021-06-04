@@ -17,7 +17,7 @@ def capture(videoFile, imagePath, progressbar):
         count += 1
         progressbar.setValue(count)
     cap.release()
-
+    print("done")
 
 class staticROI(object):
     def __init__(self, videoFile):

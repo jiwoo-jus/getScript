@@ -1,9 +1,7 @@
 import os, io, shutil
 from google.cloud import vision
 
-from textToAudio import audio
-
-os.environ['GOOGLE_APPLICATION_CREDENTIALS']=r"C:\WorkSpace\pycharm\getScript\tough-forest-313501-3024710167ae.json"
+os.environ['GOOGLE_APPLICATION_CREDENTIALS']=r"C:\WorkSpace\pycharm\jw-img2txt-8f65dde3d9fb.json"
 
 
 def detect_text(path):
@@ -58,4 +56,5 @@ def script(imagePath, savePath, scriptFile, progressbar):
 
     os.remove(savePath + '\\target.txt')
     shutil.rmtree(imagePath)
+    print("done")
 

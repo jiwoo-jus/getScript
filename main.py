@@ -4,8 +4,8 @@ from PyQt5.QtWidgets import QWidget, QPushButton, QGridLayout, QFileDialog, QLab
 from PyQt5.QtCore import Qt
 from extractFrames import capture
 from writeScript import script
-from textToAudio import audio
-from translateLanguage import trans
+from textToSpeech import audio
+from translate import trans
 
 class QtGUI(QWidget):
     def __init__(self):
@@ -66,7 +66,7 @@ class QtGUI(QWidget):
     def video_select(self):
         self.pbar1.setValue(0)
         self.pbar2.setValue(0)
-        FileOpen = QFileDialog.getOpenFileName(self, 'Open file', r'C:\Users\parkj\Downloads')
+        FileOpen = QFileDialog.getOpenFileName(self, 'Open file', 'sample')
         self.label1.setText(FileOpen[0])
 
     def extract_frames(self):
@@ -92,7 +92,7 @@ class QtGUI(QWidget):
         script(imagePath, savepath, scriptFile, self.pbar2)
 
     def text_to_audio(self):
-        print("\n>>> text_to_audio...")
+        print("\n>>> convert to audio...")
         savepath = self.label1.text().split('/')
         videoname = savepath.pop().split('.')[0]
         scriptname = videoname + '_script.txt'
@@ -102,7 +102,7 @@ class QtGUI(QWidget):
         audio(audioFile, scriptname)
 
     def trans(self):
-        print("\n>>> translate English to Korean...")
+        print("\n>>> translate...")
         savepath = self.label1.text().split('/')
         videoname = savepath.pop().split('.')[0]
         scriptname = videoname + '_script.txt'
