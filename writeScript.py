@@ -1,7 +1,7 @@
 import os, io, shutil
 from google.cloud import vision
 
-os.environ['GOOGLE_APPLICATION_CREDENTIALS']=r"C:\Users\parkj\key\visionapi-315816-82298d577291.json"
+os.environ['GOOGLE_APPLICATION_CREDENTIALS']=r"C:\Users\parkj\key\YourVisionApiKeyName12345.json"
 
 
 def detect_text(path):
