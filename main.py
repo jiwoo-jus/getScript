@@ -73,8 +73,8 @@ class QtGUI(QWidget):
     def extract_frames(self):
         self.label2.setText("Generate script...")
         print("\n>>> extract frames...")
-        videoFile = self.label1.text()
-        savepath = videoFile.split('/')[:-1]
+        videoFile = self.label1.text().replace('/', '\\')
+        savepath = videoFile.split('\\')[:-1]
         savepath = ('\\').join(savepath)
         os.chdir(savepath)
         if not os.path.exists('Capture'):
