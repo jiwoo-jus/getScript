@@ -1,9 +1,9 @@
+import os, codecs
 from googletrans import Translator
-import codecs
-import os
+
 
 def trans(textFile, transFile):
-    print(os.getcwd() + textFile)
+    print(os.getcwd() + '\\' + textFile)
     translator = Translator()
     with codecs.open(textFile, 'r', 'utf-8') as f:
         text = f.read()

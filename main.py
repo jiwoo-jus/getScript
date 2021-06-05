@@ -7,11 +7,12 @@ from writeScript import script
 from textToSpeech import audio
 from translate import trans
 
+
 class QtGUI(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("get script")
-        self.resize(300, 100)
+        self.resize(400, 100)
 
         self.layout = QVBoxLayout()
 

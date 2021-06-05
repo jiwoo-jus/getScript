@@ -19,6 +19,7 @@ def capture(videoFile, imagePath, progressbar):
     cap.release()
     print("done")
 
+
 class staticROI(object):
     def __init__(self, videoFile):
         self.capture = cv2.VideoCapture(videoFile)
